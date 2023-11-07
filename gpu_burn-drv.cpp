@@ -367,26 +367,6 @@ template<class T> void startBurn(int index, int writeFd, T *A, T *B, bool double
 	}
 }
 
-int pollTemp(pid_t *p) {
-	int tempPipe[2];
-	pipe(tempPipe);
-	
-	pid_t myPid = fork();
-
-	if (!myPid) {
-		close(tempPipe[0]);
-		dup2(tempPipe[1], STDOUT_FILENO); // Stdout
-		execlp("nvidia-smi", "nvidia-smi", "-l", "5", "-q", "-d", "TEMPERATURE", NULL);
-		fprintf(stderr, "Could not invoke nvidia-smi, no temps available\n");
-		
-		exit(0);
-	}
-
-	*p = myPid;
-	close(tempPipe[1]);
-
-	return tempPipe[0];
-}
 
 void updateTemps(int handle, std::vector<int> *temps) {
 	const int readSize = 10240;
@@ -568,8 +548,6 @@ void listenClients(std::vector<int> clientFd, std::vector<pid_t> clientPid, int 
 }
 
 template<class T> void launch(int runLength, bool useDoubles, bool useTensorCores) {
-	system("nvidia-smi -L");
-
 	// Initting A and B with random data
 	T *A = (T*) malloc(sizeof(T)*SIZE*SIZE);
 	T *B = (T*) malloc(sizeof(T)*SIZE*SIZE);
