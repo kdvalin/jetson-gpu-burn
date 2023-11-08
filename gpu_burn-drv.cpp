@@ -530,13 +530,13 @@ void listenClients(std::vector<int> clientFd, std::vector<pid_t> clientPid, int 
 		if (startTime + runTime < thisTime)
 			break;
 	}
-
 	printf("\nKilling processes.. ");
 	fflush(stdout);
-	for (size_t i = 0; i < clientPid.size(); ++i)
-		kill(clientPid.at(i), 15);
-	
-	kill(tempPid, 15);
+	for (size_t i = 0; i < clientPid.size(); ++i){
+		if(clientPid.at(i) != getpid()) {
+			kill(clientPid.at(i), 15);
+		}
+	}
 	close(tempHandle);
 
 	while (wait(NULL) != -1);
